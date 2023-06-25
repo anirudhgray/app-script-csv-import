@@ -13,8 +13,8 @@ function showImportDialog() {
 }
 
 function importCSV(overwrite, csvData, headerRow, transformations) {
-  console.log("in app script!")
-  var csvRows = csvData.split("\n");
+  console.log('in app script!');
+  var csvRows = csvData.split('\n');
 
   var sheet = SpreadsheetApp.getActiveSheet();
   var existingData = sheet.getDataRange().getValues();
@@ -26,19 +26,22 @@ function importCSV(overwrite, csvData, headerRow, transformations) {
     lastRow = 0;
   }
 
-  var headerRow = csvRows[0].split(",");
+  var headerRow = csvRows[0].split(',');
   for (var j = 0; j < headerRow.length; j++) {
     sheet.getRange(lastRow + 1, j + 1).setValue(headerRow[j]);
   }
-  lastRow++
+  lastRow++;
 
   for (var i = 1; i < csvRows.length; i++) {
-    var rowData = csvRows[i].split(",");
+    var rowData = csvRows[i].split(',');
 
     for (var j = 0; j < rowData.length; j++) {
       var column = headerRow[j];
       var transformationType = transformations[j];
-      var transformedValue = applyTransformation(rowData[j], transformationType);
+      var transformedValue = applyTransformation(
+        rowData[j],
+        transformationType
+      );
 
       sheet.getRange(lastRow + 1, j + 1).setValue(transformedValue);
     }
@@ -62,25 +65,29 @@ function applyTransformation(value, transformationType) {
 function applyDateFormatTransformation(value) {
   // Apply your date format transformation logic here
   // For example, changing from DD MM YYYY to MM YYYY
-  var parts = value.split(" ");
+  var parts = value.split(' ');
   var day = parts[0];
   var month = parts[1];
   var year = parts[2];
-  return month + " " + year;
+  return month + ' ' + year;
 }
 
 function applySquareTransformation(value) {
   // Apply your square transformation logic here
   // For example, squaring a numerical value
   var number = parseFloat(value);
-  return number * number;
+  if (typeof number == 'number') {
+    return number * number;
+  } else {
+    return value;
+  }
 }
 
 function applyDefaultIfEmptyTransformation(value) {
   // Apply your default if empty transformation logic here
   // For example, assigning a default value if the value is empty
-  if (value.trim() === "") {
-    return "Default Value";
+  if (value.trim() === '') {
+    return 'Default Value';
   }
   return value;
 }
