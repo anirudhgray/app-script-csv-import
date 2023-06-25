@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <form id="importForm">
+      <label for="file">Select CSV file:</label>
+      <input type="file" id="file" accept=".csv" required>
+      <br><br>
+      <label for="overwrite">Import Mode:</label>
+      <select id="overwrite" required>
+        <option value="false">Append</option>
+        <option value="true">Overwrite</option>
+      </select>
+      <br><br>
+      <input type="button" value="Next" onclick="showTransformations()">
+    </form>
+
+    <form id="transformationsForm" style="display: none;">
+      <h2>Column Transformations</h2>
+      <div id="columnTransformations">
+        <!-- The column transformations will be dynamically added here -->
+      </div>
+      <br>
+      <input type="button" value="Import" onclick="importCSV()">
+      <input type="button" value="Back" onclick="showImportForm()">
+      <div id="loader">
+        <div class="spinner"></div>
+      </div>
+    </form>
+
+    <script>
+      var headerRow;
+
+      function showTransformations() {
+        var file = document.getElementById('file').files[0];
+        var overwrite = document.getElementById('overwrite').value === "true";
+
+        if (file) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var csvData = e.target.result;
+            var lines = csvData.split("\n");
+            headerRow = lines[0].split(",");
+
+            var columnTransformations = document.getElementById('columnTransformations');
+            columnTransformations.innerHTML = '';
+
+            for (var i = 0; i < headerRow.length; i++) {
+              var column = headerRow[i].trim();
+              var row = document.createElement('div');
+              row.innerHTML = '<label>' + column + ':</label>' +
+                '<select id="transformation_' + i + '">' +
+                '<option value="">No Transformation</option>' +
+                '<option value="DateFormat">Date Format</option>' +
+                '<option value="Square">Square</option>' +
+                '<option value="DefaultIfEmpty">Default if Empty</option>' +
+                '</select>';
+              columnTransformations.appendChild(row);
+            }
+
+            document.getElementById('importForm').style.display = 'none';
+            document.getElementById('transformationsForm').style.display = 'block';
+          };
+
+          reader.readAsText(file);
+        }
+      }
+
+      function showImportForm() {
+        document.getElementById('transformationsForm').style.display = 'none';
+        document.getElementById('importForm').style.display = 'block';
+      }
+
+      function importCSV() {
+        console.log("In import CSV")
+        var transformations = [];
+        for (var i = 0; i < headerRow.length; i++) {
+          var transformationSelect = document.getElementById('transformation_' + i);
+          var transformation = transformationSelect.value;
+          transformations.push(transformation);
+        }
+        console.log(transformations)
+
+        var file = document.getElementById('file').files[0];
+        console.log(file)
+        var overwrite = document.getElementById('overwrite').value === "true";
+
+        if (file) {
+          var reader = new FileReader();
+          // reader.onload = function(e) {
+          //   var csvData = e.target.result;
+          //   console.log(headerRow, overwrite, transformations)
+          //   google.script.run.importCSV(csvData, headerRow, transformations, overwrite);
+          //   google.script.host.close();
+          // };
+
+          reader.onload = function(e) {
+            var csvData = e.target.result;
+            document.getElementById('loader').style.display = 'block';
+            google.script.run.withSuccessHandler(onImportSuccess).importCSV(overwrite, csvData, headerRow, transformations);
+          };
+
+          reader.readAsText(file);
+        }
+      }
+
+      function onImportSuccess() {
+        document.getElementById('loader').style.display = 'none';
+        console.log("Import completed successfully");
+        google.script.host.close();
+      }
+    </script>
+
+    <style>
+      #loader {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      #loader .spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50px;
+        height: 50px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+
+    </style>
+  </body>
+</html>
