@@ -63,8 +63,6 @@ function applyTransformation(value, transformationType) {
 }
 
 function applyDateFormatTransformation(value) {
-  // Apply your date format transformation logic here
-  // For example, changing from DD MM YYYY to MM YYYY
   var parts = value.split(' ');
   var day = parts[0];
   var month = parts[1];
@@ -73,10 +71,9 @@ function applyDateFormatTransformation(value) {
 }
 
 function applySquareTransformation(value) {
-  // Apply your square transformation logic here
-  // For example, squaring a numerical value
   var number = parseFloat(value);
-  if (typeof number == 'number') {
+  console.log(typeof value);
+  if (!isNaN(value)) {
     return number * number;
   } else {
     return value;
@@ -84,10 +81,10 @@ function applySquareTransformation(value) {
 }
 
 function applyDefaultIfEmptyTransformation(value) {
-  // Apply your default if empty transformation logic here
-  // For example, assigning a default value if the value is empty
   if (value.trim() === '') {
     return 'Default Value';
   }
   return value;
 }
+
+// can create more transforms
